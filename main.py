@@ -38,6 +38,8 @@ class ImageViewerApp:
         self.current_index = 0
         self.categories = {}
         self.category_buttons = []
+        
+        self.root.bind("<KeyPress>", self.key_pressed)
 
     def load_images(self):
         dir_path = filedialog.askdirectory()
@@ -83,8 +85,9 @@ class ImageViewerApp:
     def add_category(self):
         category_name = simpledialog.askstring("Add Category", "Enter category name:")
         if category_name and category_name not in self.categories:
+            index = len(self.category_buttons) + 1
             row, col = divmod(len(self.category_buttons), 3)  # Arrange buttons in grid
-            category_btn = tk.Button(self.category_frame, text=category_name, command=lambda cn=category_name: self.move_image_to_category(cn), bg="#e74c3c", fg="white", font=("Arial", 10, "bold"), padx=10, pady=5)
+            category_btn = tk.Button(self.category_frame, text=f"{index}. {category_name}", command=lambda cn=category_name: self.move_image_to_category(cn), bg="#e74c3c", fg="white", font=("Arial", 10, "bold"), padx=10, pady=5)
             category_btn.grid(row=row, column=col, padx=5, pady=5)
             self.categories[category_name] = category_btn
             self.category_buttons.append(category_btn)
@@ -97,6 +100,13 @@ class ImageViewerApp:
             shutil.copy(img_path, os.path.join(category_folder, os.path.basename(img_path)))
             self.image_label.config(text=f"Moved to {category_name}")
             self.next_image()
+
+    def key_pressed(self, event):
+        if event.char.isdigit():
+            index = int(event.char) - 1
+            if 0 <= index < len(self.category_buttons):
+                category_name = list(self.categories.keys())[index]
+                self.move_image_to_category(category_name)
 
 if __name__ == "__main__":
     root = tk.Tk()
